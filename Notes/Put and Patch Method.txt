@@ -1,0 +1,16 @@
+In HTTP, both PUT and PATCH methods are used for updating resources, but they have slightly different semantics:
+
+Chat GPT
+
+PUT method: The PUT method is used to completely replace an existing resource or create a new resource if it doesn't exist. 
+When making a PUT request, the entire resource representation is sent in the request payload, including any fields that may be missing or unchanged. It means that a PUT request is idempotent, 
+which means multiple identical requests will have the same effect as a single request. In other words, making the same PUT request multiple times will result in the same state on the server.
+
+PATCH method: The PATCH method is used to partially update an existing resource. Unlike PUT, a PATCH request only includes the changes that need to be applied to the resource, rather than sending the entire resource representation. 
+It allows clients to send a set of changes or instructions to modify specific fields or properties of the resource. PATCH requests are not necessarily idempotent, meaning that multiple identical requests may have different effects on the resource if applied more than once.
+
+In summary, the key difference between PUT and PATCH is that PUT is used to replace or create a resource entirely, while PATCH is used to make partial updates to an existing resource. The choice between them depends on the specific requirements of your application and the desired behavior for updating resources.
+
+
+
+

@@ -1,0 +1,79 @@
+/* 
+Chat GPT
+- The UserSchemaTypes interface in Mongoose is typically extended from the Document interface to ensure that it includes all the properties and methods provided by Mongoose for working with MongoDB documents.
+- The Document interface is a built-in interface in Mongoose that represents a MongoDB document. It provides type definitions and methods for interacting with the document, such as saving, updating, and deleting.
+- By extending the UserSchemaTypes interface from Document, you ensure that the interface includes all the necessary properties and methods for working with Mongoose models. However, if you have removed the extends Document part and your code still works without any errors, it suggests that the interface is not relying on any specific Mongoose functionality that requires the Document interface.
+- In some cases, you may not need to explicitly extend from Document if you're not using any of the Mongoose-specific features. However, if you plan to use Mongoose methods or properties on your models or documents, it's recommended to extend the interface from Document to ensure proper type checking and compatibility.
+- So, while it may work without extending from Document in your specific case, it's generally a good practice to include it if you're working with Mongoose models and documents to ensure type safety and leverage Mongoose-specific functionality.
+*/
+
+interface UserSchemaTypes extends Document {
+    name: string;
+    email: string;
+    password: string;
+    // createJWT(res: express.Response): string;
+    createJWT: (res: express.Response) => string;
+}
+  
+
+
+const UserSchema: Schema = new Schema<UserSchemaTypes>({
+    name: {
+        type:String,
+        required:[true, "please provide your name"],
+        minLength:3, 
+        maxLength:50
+    }, 
+
+    email: {
+        type:String,
+        unique: true,
+        index: true,
+        required:[true, "please provide your email"],
+        match:[
+            /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+            "please provide valid email"
+        ]
+    }, 
+ 
+    password: {
+        type:String,
+        required:[true, "please provide your password"],
+        minLength:6, 
+    }, 
+
+
+} /*{ collection: "users", timestamps: true, autoIndex: false} */);
+
+UserSchema.set("collection", "users");
+UserSchema.set("timestamps", true);
+// UserSchema.set("autoIndex", false);
+
+// UserSchema.path("email").index(true);
+// UserSchema.path("email").index({ unique: true });
+
+
+
+UserSchema.method("createJWT", function(res: express.Response) {
+    const secret = process.env.JWT_SECRET;
+
+    if (!secret) {
+        res.status(400).json({ err: 'JWT secret key is not defined' });
+        return;
+    }
+
+    const payload = jwt.sign(
+        {userId: this._id, name: this.name},
+        secret,
+        {expiresIn: "30d",}
+    );
+
+    return payload;
+})
+
+
+
+
+
+const UsersModel: Model<UserSchemaTypes> = model<UserSchemaTypes>("users", UserSchema);
+export default UsersModel;
